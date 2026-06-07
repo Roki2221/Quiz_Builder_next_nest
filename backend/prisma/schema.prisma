@@ -1,0 +1,38 @@
+// Prisma schema for the Quiz Builder app.
+// Quiz has many Questions; deleting a Quiz cascades to its Questions.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Question types supported by the quiz builder form.
+enum QuestionType {
+  BOOLEAN
+  INPUT
+  CHECKBOX
+}
+
+model Quiz {
+  id        String     @id @default(uuid())
+  title     String
+  createdAt DateTime   @default(now())
+  questions Question[]
+}
+
+model Question {
+  id      String       @id @default(uuid())
+  quizId  String
+  type    QuestionType
+  text    String
+  // Checkbox options are stored as a string array; empty for BOOLEAN/INPUT.
+  options String[]
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+}
